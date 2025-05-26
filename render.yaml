@@ -1,12 +1,70 @@
 services:
-  - type: web
-    name: ai-elearning-platform
+  - type: web # Django Web Service
+    name: skill-path # Or your preferred service name (e.g., skill-path-web)
     env: python
-    plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn elearning_project.wsgi:application"
+    region: oregon # e.g., oregon, frankfurt, singapore (choose one)
+    plan: free # Or 'starter' etc.
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput 
+      # python manage.py migrate (This will be run by the 'release' command in Procfile if defined there)
+    startCommand: "gunicorn elearning_project.wsgi --log-file -"
+    healthCheckPath: / # A simple path Render can check (e.g., your homepage)
     envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: elearning_project.settings
       - key: PYTHON_VERSION
-        value: 3.10
+        value: "3.11" # Match your development Python version
+      - key: DJANGO_SECRET_KEY
+        generateValue: true # Render will generate a secure one
+      - key: DATABASE_URL
+        fromDatabase:
+          name: skill-path-db # Must match the name of your PostgreSQL service below
+          property: connectionString
+      - key: DJANGO_DEBUG
+        value: "False" # Set to False for production
+      - key: SITE_DOMAIN # Will be auto-filled by Render if you set custom domain, or use your .onrender.com URL
+        sync: false # Set to true if you want Render to auto-update this with your .onrender.com URL
+      # --- SENSITIVE KEYS: Add these directly in Render Dashboard Environment or as Secret Files ---
+      # It's better not to list actual secret values in render.yaml if it's committed to public repo
+      # Example of how to reference a secret file:
+      # - key: OPENAI_API_KEY
+      #   fromSecretFile:
+      #     name: openai-credentials
+      #     key: api_key
+      #
+      # For now, you will set these directly in the Render Dashboard's Environment section for the web service:
+      # OPENAI_API_KEY
+      # DJANGO_EMAIL_HOST_USER
+      # DJANGO_EMAIL_HOST_PASSWORD
+      # (And AWS keys if using S3)
+      
+      # --- Other Non-Sensitive Env Vars (can be here or in dashboard) ---
+      - key: DJANGO_EMAIL_BACKEND
+        value: "django.core.mail.backends.smtp.EmailBackend"
+      - key: DJANGO_EMAIL_HOST
+        value: "smtp.gmail.com"
+      - key: DJANGO_EMAIL_PORT
+        value: "587"
+      - key: DJANGO_EMAIL_USE_TLS
+        value: "True"
+      - key: DJANGO_DEFAULT_FROM_EMAIL # Should match DJANGO_EMAIL_HOST_USER if using Gmail
+        value: "your-email@gmail.com" # Set this
+      - key: OPENAI_CHAT_MODEL
+        value: "gpt-4o-mini"
+      - key: OPENAI_CHAT_TEMPERATURE
+        value: "0.7"
+      - key: CHATBOT_MAX_HISTORY_LENGTH
+        value: "10"
+      - key: EMBEDDING_MODEL
+        value: "text-embedding-ada-002"
+      - key: SAQ_MIN_LENGTH
+        value: "15"
+
+  - type: pserv # PostgreSQL Database Service
+    name: skill-path-db
+    env: postgres
+    region: oregon # Match web service region
+    plan: free # Or a paid plan for more resources
+    postgresMajorVersion: 15 # Or your preferred version
+    disk:
+      sizeGB: 1 # For free tier
