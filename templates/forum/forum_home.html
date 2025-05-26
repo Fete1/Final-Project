@@ -1,0 +1,31 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}{{ page_title|default:"Forums" }} - {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ page_title|default:"Discussion Forums" }}</h1>
+    {% if categories %}
+    <div class="list-group shadow-sm">
+        {% for category in categories %}
+        <a href="{{ category.get_absolute_url }}" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ category.name }}</h5>
+                <small class="text-muted">{{ category.threads.count }} thread{{ category.threads.count|pluralize }}</small>
+            </div>
+            <p class="mb-1">{{ category.description|default:"General discussions related to this category."|truncatewords:20 }}</p>
+            {% with last_thread=category.threads.all.first %} {# .first because ordered by -updated_at #}
+                {% if last_thread %}
+                <small class="text-muted">Last activity: {{ last_thread.updated_at|timesince }} ago in "{{ last_thread.title|truncatechars:30 }}"</small>
+                {% else %}
+                <small class="text-muted">No threads yet.</small>
+                {% endif %}
+            {% endwith %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No forum categories available yet.</p>
+    {% endif %}
+</div>
+{% endblock content %}

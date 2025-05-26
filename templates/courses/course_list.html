@@ -1,0 +1,68 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% load course_tags %}
+
+
+{% block title %}Available Courses - {{ block.super }}{% endblock title %}
+
+{% block content %}
+<section class="courses-section py-5">
+    <div class="container px-4 py-5">
+        <h1 class="section-title text-center display-5 mb-5" data-aos="fade-up">
+            Our <span class="highlight-accent">Courses</span>
+        </h1>
+        {% if courses %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for course in courses %}
+                <div class="col d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|multiply:100 }}">
+                    <div class="glass-card h-100 shadow-lg d-flex flex-column">
+                        <a href="{% url 'courses:course_detail' course_slug=course.slug %}" class="text-decoration-none">
+                            {% if course.thumbnail %}
+                                <img src="{{ course.thumbnail.url }}" class="course-card-thumbnail" alt="{{ course.title }} thumbnail">
+                            {% else %}
+                                <img src="{% static 'images/default_course_thumbnail.png' %}" class="course-card-thumbnail" alt="Default course thumbnail">
+                            {% endif %}
+                        </a>
+                        <div class="p-4 d-flex flex-column flex-grow-1">
+                            <h5 class="fw-bold fs-5 mb-2">
+                                <a href="{% url 'courses:course_detail' course_slug=course.slug %}" class="stretched-link text-decoration-none text-accent">{{ course.title }}</a>
+                            </h5>
+                            <p class="small flex-grow-1" style="color:var(--text-muted-custom);">
+                                {{ course.description|truncatewords:20 }}
+                            </p>
+                            <div class="d-flex align-items-center justify-content-between mt-3">
+                                <span class="badge rounded-pill px-3 py-2" style="background:var(--secondary-color); color:var(--accent-color); font-weight:500;">
+                                    <i class="bi bi-person-fill"></i> {{ course.instructor.get_short_name|default:course.instructor.username }}
+                                </span>
+                                <a href="{% url 'courses:course_detail' course_slug=course.slug %}" class="btn btn-sm btn-secondary-custom">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5" data-aos="fade-up">
+                <p class="lead" style="color:var(--text-muted-custom);">
+                    No courses available at the moment. Please check back later!
+                </p>
+                <a href="{% url 'core:home' %}" class="btn btn-primary-custom btn-lg mt-3">Back to Home</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<!-- AOS JS (if not already in base.html) -->
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 700,
+        easing: 'ease-in-out-quad',
+        once: true,
+        mirror: false,
+        offset: 100
+    });
+</script>
+{% endblock extra_js %}

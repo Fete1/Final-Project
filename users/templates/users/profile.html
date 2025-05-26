@@ -1,0 +1,282 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<style>
+  body {
+    background: var(--light-bg) var(--tinytexture-url) repeat;
+    min-height: 100vh;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    transition: var(--transition);
+  }
+  .profile-edit-card {
+    background: rgba(var(--primary-color-rgb), 0.20);
+    box-shadow: var(--shadow-neumorph);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(14px) brightness(1.10);
+    border: 1px solid rgba(var(--accent-color-rgb), 0.08);
+    max-width: 560px;
+    margin: 3rem auto;
+    padding: 2.5rem 2.2rem 2rem 2.2rem;
+    position: relative;
+    transition: box-shadow 0.3s;
+  }
+  .profile-edit-card:hover {
+    box-shadow: var(--shadow-lg-hover);
+  }
+  .profile-avatar-wrapper {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .profile-avatar {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--accent-color);
+    box-shadow: 0 0 0 6px var(--light-bg-alt);
+    background: var(--light-bg-alt);
+    transition: box-shadow 0.3s;
+  }
+  .profile-avatar-upload-label {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background: var(--accent-color);
+    color: var(--text-light);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    text-align: center;
+    line-height: 34px;
+    font-size: 1.3rem;
+    box-shadow: 0 3px 16px 0 rgba(var(--accent-color-rgb), 0.23);
+    cursor: pointer;
+    border: 2px solid var(--light-bg);
+    transition: background 0.2s;
+  }
+  .profile-avatar-upload-label:hover {
+    background: var(--secondary-color);
+  }
+  .profile-avatar-upload {
+    display: none;
+  }
+  .profile-badge {
+    font-size: 0.96rem;
+    background: var(--accent-color);
+    color: var(--text-light);
+    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.8rem;
+    margin-left: 0.3rem;
+    font-weight: 500;
+    box-shadow: 0 1px 5px 0 rgba(var(--accent-color-rgb), 0.13);
+  }
+  .profile-badge-unverified {
+    background: #ff8a65;
+    color: #fff;
+    font-weight: 500;
+  }
+  .profile-badge-verified {
+    background: #43e97b;
+    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    color: #fff;
+    font-weight: 600;
+  }
+  .form-label {
+    color: var(--text-dark);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    margin-bottom: 0.3rem;
+    transition: color 0.2s;
+  }
+  /* Custom neumorphic/glass inputs */
+  .form-control,
+  textarea.form-control {
+    background: rgba(var(--light-bg-rgb, 248,249,250), 0.7);
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow:
+      4px 4px 18px rgba(var(--primary-color-rgb), 0.10),
+      -4px -4px 18px rgba(var(--accent-color-rgb), 0.08),
+      var(--shadow-inset);
+    color: var(--text-dark);
+    font-size: 1.11em;
+    font-weight: 500;
+    padding: 0.85rem 1.1rem;
+    outline: none;
+    transition: box-shadow 0.23s, background 0.22s, color 0.22s;
+    backdrop-filter: blur(2px);
+  }
+  .form-control:focus, textarea.form-control:focus {
+    background: rgba(var(--light-bg-rgb, 248,249,250), 1);
+    box-shadow:
+      0 0 0 3px rgba(var(--accent-color-rgb), 0.17),
+      0 2px 18px 0 rgba(var(--accent-color-rgb), 0.12),
+      var(--shadow-inset);
+    border: none;
+    color: var(--text-dark);
+  }
+  .form-control[readonly], .form-control:disabled {
+    background: var(--light-bg-alt);
+    color: var(--text-muted-dark);
+    font-weight: 500;
+    opacity: 0.95;
+  }
+  .form-section {
+    margin-bottom: 1.12rem;
+  }
+  .form-actions {
+    display: flex;
+    gap: 1.2rem;
+    margin-top: 2rem;
+    justify-content: flex-end;
+  }
+  .btn-accent {
+    background: var(--accent-color);
+    color: #fff;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border: none;
+    box-shadow: 0 2px 12px 0 rgba(var(--accent-color-rgb), 0.12);
+    transition: var(--transition);
+  }
+  .btn-accent:hover, .btn-accent:focus {
+    background: var(--secondary-color);
+    color: #fff;
+  }
+  .btn-outline-dark {
+    border-radius: var(--radius-sm);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 500;
+    background: var(--light-bg-alt);
+    transition: var(--transition);
+  }
+  .btn-outline-dark:hover, .btn-outline-dark:focus {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+  }
+  .points-badge {
+    background: linear-gradient(90deg, var(--progress-color) 0%, var(--accent-color) 100%);
+    color: #fff;
+    font-weight: 700;
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-md);
+    font-size: 1.14em;
+    box-shadow: 0 2px 7px 0 rgba(var(--accent-color-rgb),0.16);
+    margin-bottom: 1.3rem;
+    display: inline-block;
+  }
+  /* Animate label on focus (material style) */
+  .form-section {
+    position: relative;
+  }
+  .form-control:focus + .form-label,
+  .form-control:not(:placeholder-shown) + .form-label {
+    color: var(--accent-color);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* File input: visually hidden but accessible */
+  input[type="file"].profile-avatar-upload {
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    position: absolute;
+    pointer-events: none;
+  }
+  @media (max-width: 600px) {
+    .profile-edit-card {
+      padding: 1.3rem 0.5rem 1.8rem 0.5rem;
+      max-width: 98vw;
+      border-radius: var(--radius-md);
+    }
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+    }
+    .form-control, textarea.form-control {
+      font-size: 1em;
+      padding: 0.7rem 0.7rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="profile-edit-card shadow position-relative">
+
+    <form method="post" enctype="multipart/form-data" autocomplete="off">
+      {% csrf_token %}
+      <div class="profile-avatar-wrapper position-relative mb-3">
+        <img id="avatarPreview" 
+        
+        class="rounded-circle border border-3 border-accent shadow" src="{{ user.profile.profile_picture.url }}" width="400" height="400" alt="{{ user.get_full_name|default:user.email }}'s profile picture" loading="lazy">
+        <label for="id_profile_picture" class="profile-avatar-upload-label"  title="Change profile picture">
+          <i class="bi bi-camera"></i>
+          <input id="id_profile_picture" name="profile_picture" type="file" accept="image/*" class="profile-avatar-upload" tabindex="0" aria-label="Upload new profile picture" onchange="updateAvatarPreview(event)">
+        </label>
+      </div>
+      <div class="text-center mb-2">
+        <span class="points-badge">
+          <i class="bi bi-stars me-1"></i>
+          {{ user.profile.points|default:0 }} Points
+        </span>
+      </div>
+      <div class="text-center mb-2">
+        {% if user.profile.email_verified %}
+          <span class="profile-badge profile-badge-verified"><i class="bi bi-patch-check-fill"></i> Verified Email</span>
+        {% else %}
+          <span class="profile-badge profile-badge-unverified"><i class="bi bi-exclamation-diamond"></i> Email Not Verified</span>
+          <a href="{% url 'resend_email_verification' %}" class="btn btn-sm btn-outline-dark ms-2" style="vertical-align: middle;">Resend</a>
+        {% endif %}
+      </div>
+
+      <div class="form-section">
+        <input type="email" class="form-control" id="id_email" name="email"
+          value="{{ user.email }}" readonly tabindex="-1" style="background: var(--light-bg-alt); color: var(--text-muted-dark); font-weight: 500;" placeholder=" ">
+        <label for="id_email" class="form-label">Email address</label>
+      </div>
+      <div class="form-section">
+        <input type="text" class="form-control" id="id_first_name" name="first_name" maxlength="150"
+          value="{{ user.first_name }}" placeholder=" ">
+        <label for="id_first_name" class="form-label">First Name</label>
+      </div>
+      <div class="form-section">
+        <input type="text" class="form-control" id="id_last_name" name="last_name" maxlength="150"
+          value="{{ user.last_name }}" placeholder=" ">
+        <label for="id_last_name" class="form-label">Last Name</label>
+      </div>
+      <div class="form-section">
+        <textarea class="form-control" id="id_bio" name="bio" rows="3" maxlength="400" placeholder=" ">{{ user.profile.bio }}</textarea>
+        <label for="id_bio" class="form-label">Bio</label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-accent px-4">Save Changes</button>
+        <a href="{% url 'users:profile' %}" class="btn btn-outline-dark px-4">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Live avatar preview
+  function updateAvatarPreview(event) {
+    const input = event.target;
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('avatarPreview').src = e.target.result;
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+{% endblock %}

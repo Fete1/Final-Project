@@ -18,26 +18,39 @@
     <title>{% block title %}AI E-Learning Platform{% endblock title %}</title>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">AI E-Learning</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'core:home' %}">AI E-Learning</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.view_name == 'core:home' %}active{% endif %}" href="{% url 'core:home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.app_name == 'courses' and 'list' in request.resolver_match.view_name %}active{% endif %}" href="{% url 'courses:course_list' %}">Courses</a>
+                </li>
+                {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        <a class="nav-link {% if request.resolver_match.view_name == 'users:profile' %}active{% endif %}" href="{% url 'users:profile' %}">Profile</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Courses</a>
+                        <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+                    </li>ii7
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.view_name == 'users:login' %}active{% endif %}" href="{% url 'users:login' %}">Login</a>
                     </li>
-                    <!-- Add more nav items later: login, logout, profile -->
-                </ul>
-            </div>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.view_name == 'users:register' %}active{% endif %}" href="{% url 'users:register' %}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
         </div>
-    </nav>
-
+    </div>
+</nav>
     <main class="container mt-4">
         {% if messages %}
             {% for message in messages %}

@@ -1,0 +1,27 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}{{ page_title|default:"Create Thread" }} - {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'forum:forum_home' %}">Forums</a></li>
+            <li class="breadcrumb-item"><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">New Thread</li>
+        </ol>
+    </nav>
+    <h1>{{ page_title|default:"Start a New Thread" }}</h1>
+    <p>In category: <strong>{{ category.name }}</strong></p>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ thread_form|crispy }}
+        {% comment %}
+        If using combined form for thread title + first post content:
+        {{ initial_post_form|crispy }}
+        {% endcomment %}
+        <button type="submit" class="btn btn-primary mt-3">Create Thread</button>
+    </form>
+</div>
+{% endblock content %}

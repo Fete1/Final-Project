@@ -1,0 +1,66 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% load crispy_forms_tags %} {# For the post form #}
+
+{% block title %}{{ page_title|default:"Thread" }} - {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'forum:forum_home' %}">Forums</a></li>
+            <li class="breadcrumb-item"><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ thread.title|truncatechars:50 }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-1">{{ thread.title }}</h1>
+    <p class="text-muted"><small>Started by {{ thread.author.username }} on {{ thread.created_at|date:"N j, Y, P" }}</small></p>
+    <hr>
+
+    {% for post in page_obj.object_list %}
+    <div class="card mb-3 shadow-sm {% if post.author == request.user %}border-primary{% endif %}">
+        <div class="row g-0">
+            <div class="col-md-2 text-center bg-light p-3 border-end">
+                <img src="{{ post.author.profile.profile_picture.url }}" alt="{{ post.author.username }}" class="rounded-circle mb-2" style="width: 60px; height: 60px; object-fit: cover;">
+                <h6 class="mb-0"><a href="#">{{ post.author.username }}</a></h6> {# Link to user profile later #}
+                <small class="text-muted">{{ post.author.forum_posts.count }} post{{ post.author.forum_posts.count|pluralize }}</small>
+                {# Add join date, etc. later #}
+            </div>
+            <div class="col-md-10">
+                <div class="card-body">
+                    <p class="card-text">{{ post.content|linebreaksbr }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 text-end">
+                    <small class="text-muted">Posted: {{ post.created_at|timesince }} ago
+                        {% if post.updated_at|timesince != post.created_at|timesince and post.updated_at > post.created_at %}
+                            (Edited: {{ post.updated_at|timesince }} ago)
+                        {% endif %}
+                    </small>
+                    {# Add edit/delete links for post author/moderators later #}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">No posts in this thread yet. Be the first to reply!</p>
+    {% endfor %}
+
+    <!-- Pagination -->
+    {% include "partials/_pagination.html" with page_obj=page_obj %}
+
+    {% if user.is_authenticated %}
+    <hr class="mt-4">
+    <h4 class="mb-3">Post a Reply</h4>
+    <form method="POST">
+        {% csrf_token %}
+        {{ post_form|crispy }}
+        <button type="submit" class="btn btn-primary mt-2">Post Reply</button>
+    </form>
+    {% else %}
+    <div class="alert alert-info mt-4">
+        Please <a href="{% url 'users:login' %}?next={{ request.path }}" class="alert-link">login</a> to reply.
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

@@ -1,21 +1,25 @@
 import os
+from dotenv import load_dotenv # Import load_dotenv
 from pathlib import Path
+# ... (BASE_DIR is already defined)
+
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env file
+load_dotenv(os.path.join(BASE_DIR, '.env')) # Correct path to .env
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4s^zu4_bq_w)bkum3$a))muaqk5@$$l4cz9!x35q7#$dy3)o0^'
+# OpenAI API Key
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -35,6 +39,7 @@ INSTALLED_APPS = [
     'core',      # Or just 'core'
     'users',    # Or just 'users'
     'courses',
+    'forum',
 ]
 
 MIDDLEWARE = [
@@ -111,7 +116,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+AUTH_USER_MODEL = 'users.CustomUser'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -126,3 +131,35 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# elearning_project/settings.py
+
+LOGIN_REDIRECT_URL = 'users:student_dashboard'  # Where to redirect after successful login
+LOGIN_URL = 'users:login'          # The URL name for the login page
+
+LOGOUT_REDIRECT_URL = 'users:logged_out' # Or 'core:home'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS ='True' == 'True'
+EMAIL_HOST_USER = 'abebefetene2@gmail.com'
+EMAIL_HOST_PASSWORD ='zjuq qbqf eqci ossc'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
+SITE_DOMAIN = 'http://127.0.0.1:8000'
+EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24
+OPENAI_CHAT_MODEL = "gpt-4o-mini" # Or your preferred model
+OPENAI_CHAT_TEMPERATURE = 0.7
+CHATBOT_MAX_HISTORY_LENGTH = 10
+# GAMIFICATION SETTINGS
+# Levels: (level_name, points_required_to_reach, optional_icon_class)
+# The order matters: from lowest to highest points.
+# The points_required is the minimum to be AT that level.
+LEARNING_LEVELS = [
+    {'name': 'Novice', 'points': 0, 'icon': 'bi-person-fill'},
+    {'name': 'Apprentice', 'points': 100, 'icon': 'bi-person-workspace'},
+    {'name': 'Journeyman', 'points': 250, 'icon': 'bi-tools'},
+    {'name': 'Adept', 'points': 500, 'icon': 'bi-lightbulb-fill'},
+    {'name': 'Expert', 'points': 1000, 'icon': 'bi-star-fill'},
+    {'name': 'Master', 'points': 2000, 'icon': 'bi-trophy-fill'},
+    {'name': 'Grandmaster', 'points': 5000, 'icon': 'bi-gem'},
+]

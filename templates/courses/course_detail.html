@@ -1,0 +1,111 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}{{ course.title }} - {{ block.super }}{% endblock title %}
+
+{% block content %}
+<section class="course-detail-section py-5">
+    <div class="container px-4 py-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="section-title mb-4" data-aos="fade-up">{{ course.title }}</h1>
+                <p class="lead" style="color:var(--text-muted-custom);" data-aos="fade-up" data-aos-delay="100">{{ course.description }}</p>
+                <p data-aos="fade-up" data-aos-delay="200">
+                    <strong>Instructor:</strong> 
+                    <span class="badge rounded-pill px-3 py-2" style="background:var(--secondary-color); color:var(--accent-color); font-weight:500;">
+                        <i class="bi bi-person-fill"></i> {{ course.instructor.get_short_name|default:course.instructor.username }}
+                    </span>
+                </p>
+
+                {% if user.is_authenticated %}
+                    {% if is_enrolled %}
+                        <p data-aos="fade-up" data-aos-delay="300">
+                            <span class="badge rounded-pill bg-success">You are enrolled in this course.</span>
+                        </p>
+                    {% else %}
+                        <a href="{% url 'courses:enroll_course' course_slug=course.slug %}" class="btn btn-primary-custom btn-lg mb-3" data-aos="fade-up" data-aos-delay="300">Start This Course</a>
+                    {% endif %}
+                {% else %}
+                    <p data-aos="fade-up" data-aos-delay="300">
+                        <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-secondary-custom btn-lg mb-3">Login to Start Course</a>
+                    </p>
+                {% endif %}
+
+                <h2 class="section-title mt-5" data-aos="fade-up">Course Content</h2>
+
+                {% if user.is_authenticated and total_lessons_in_course > 0 %}
+                    <div class="progress mb-3 glass-card" style="height: 25px;" data-aos="fade-up" data-aos-delay="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ course_progress_percent }}%;" aria-valuenow="{{ course_progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ course_progress_percent }}% Complete
+                        </div>
+                    </div>
+                    <p class="text-muted small" style="color:var(--text-muted-custom);" data-aos="fade-up" data-aos-delay="150">
+                        {{ completed_lessons_in_course_count }} out of {{ total_lessons_in_course }} lessons completed.
+                    </p>
+                {% endif %}
+
+                {% if modules_with_progress %}
+                    <div class="accordion glass-card" id="courseModulesAccordion" data-aos="fade-up" data-aos-delay="200">
+                        {% for item in modules_with_progress %}
+                        <div class="accordion-item glass-card">
+                            <h2 class="accordion-header" id="heading{{ item.module.id }}">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ item.module.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ item.module.id }}">
+                                    <strong>Module {{ item.module.order }}: {{ item.module.title }}</strong>
+                                    {% if user.is_authenticated and item.total_lessons > 0 %}
+                                        <span class="badge rounded-pill {% if item.progress_percent == 100 %}bg-success{% else %}bg-info{% endif %} ms-auto me-3">
+                                            {{ item.progress_percent }}%
+                                        </span>
+                                    {% endif %}
+                                </button>
+                            </h2>
+                            <div id="collapse{{ item.module.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ item.module.id }}" data-bs-parent="#courseModulesAccordion">
+                                <div class="accordion-body">
+                                    {% if item.module.description %}
+                                        <p class="small" style="color:var(--text-muted-custom);">{{ item.module.description }}</p>
+                                    {% endif %}
+                                    {% if item.lessons_with_status %}
+                                        <ul class="list-group list-group-flush">
+                                            {% for lesson_data in item.lessons_with_status %}
+                                            <li class="list-group-item glass-card d-flex justify-content-between align-items-center {% if lesson_data.is_completed %}completed-lesson{% endif %}">
+                                                <a href="{% url 'courses:lesson_detail' course_slug=course.slug lesson_slug=lesson_data.lesson.slug %}"
+                                                   class="text-decoration-none {% if lesson_data.is_completed %}text-decoration-line-through text-muted{% endif %} text-accent">
+                                                    Lesson {{ lesson_data.lesson.order }}: {{ lesson_data.lesson.title }}
+                                                </a>
+                                                {% if lesson_data.is_completed %}
+                                                    <span class="badge rounded-pill bg-success"><i class="bi bi-check-lg"></i> Completed</span>
+                                                {% endif %}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p class="small" style="color:var(--text-muted-custom);">No lessons in this module yet.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center" style="color:var(--text-muted-custom);" data-aos="fade-up" data-aos-delay="200">
+                        No modules available for this course yet.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<!-- AOS JS (if not already in base.html) -->
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 700,
+        easing: 'ease-in-out-quad',
+        once: true,
+        mirror: false,
+        offset: 100
+    });
+</script>
+{% endblock extra_js %}
